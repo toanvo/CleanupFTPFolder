@@ -12,7 +12,7 @@ namespace CleanUpFolder
             try
             {
                 var credentials = new NetworkCredential(args[1], args[2]);
-                DeleteFTPDirectory(args[0], credentials);
+                DeleteFtpDirectory(args[0], credentials);
             }
             catch (Exception ex)
             {
@@ -22,22 +22,22 @@ namespace CleanUpFolder
             Console.WriteLine("Cleaning up the FTP Folder completed!");
         }
 
-        private static void DeleteFTPDirectory(string url, NetworkCredential credentials)
+        private static void DeleteFtpDirectory(string url, NetworkCredential credentials)
         {
             if (!url.EndsWith("/"))
             {
                 url += "/";
             }
 
-            var lines = ListDirectoryDetails(url, credentials);
+            var folderItems = ListDirectoryDetails(url, credentials);
 
-            foreach (var line in lines)
+            foreach (var folderItem in folderItems)
             {
-                var permissions = GetFileUrlAndTypeOfItems(url, line, out var fileUrl);
+                var typeOfFileUrl = GetFileUrlAndTypeOfItems(url, folderItem, out var fileUrl);
 
-                if (IsDirectory(permissions))
+                if (IsDirectory(typeOfFileUrl))
                 {
-                    DeleteFTPDirectory(fileUrl + "/", credentials);
+                    DeleteFtpDirectory(fileUrl + "/", credentials);
                 }
                 else
                 {
