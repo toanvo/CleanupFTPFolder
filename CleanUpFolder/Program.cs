@@ -50,12 +50,12 @@ namespace CleanUpFolder
 
         private static bool IsDirectory(string permissions)
         {
-            if (string.IsNullOrEmpty(permissions))
+            if (string.IsNullOrEmpty(permissions) || permissions.Length < 2)
             {
                 return false;
             }
 
-            return permissions[1] == 'D';
+            return permissions.ToLower()[1] == 'd';
         }
 
         private static string GetFileUrlAndTypeOfItems(string url, string line, out string fileUrl)
