@@ -57,10 +57,9 @@ namespace CleanUpFolder
         {
             string[] tokens =
                 line.Split(new[] {' '}, 9, StringSplitOptions.RemoveEmptyEntries);
-            var name = string.Empty;
             var permissions = tokens[2];
             
-            name = line.Substring(line.IndexOf(tokens[2], StringComparison.OrdinalIgnoreCase) + tokens[2].Length, line.Length - line.IndexOf(tokens[2], StringComparison.OrdinalIgnoreCase) - tokens[2].Length);
+            var name = line.Substring(line.IndexOf(tokens[2], StringComparison.OrdinalIgnoreCase) + tokens[2].Length, line.Length - line.IndexOf(tokens[2], StringComparison.OrdinalIgnoreCase) - tokens[2].Length);
             name = name.TrimStart();
 
             fileUrl = url + name;
