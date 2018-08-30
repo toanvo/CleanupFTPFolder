@@ -24,11 +24,6 @@ namespace CleanUpFolder
 
         private static void DeleteFtpDirectory(string url, NetworkCredential credentials)
         {
-            if (!url.EndsWith("/"))
-            {
-                url += "/";
-            }
-
             var folderItems = ListDirectoryDetails(url, credentials);
 
             foreach (var folderItem in folderItems)
@@ -63,44 +58,50 @@ namespace CleanUpFolder
             string[] tokens =
                 line.Split(new[] {' '}, 9, StringSplitOptions.RemoveEmptyEntries);
             var name = string.Empty;
-            for (var i = 3; i <= tokens.Length - 1; i++)
-            {
-                name += tokens[i] + " ";
-            }
-            
-            name = name.TrimEnd();
-
             var permissions = tokens[2];
+            
+            name = line.Substring(line.IndexOf(tokens[2], StringComparison.OrdinalIgnoreCase) + tokens[2].Length, line.Length - line.IndexOf(tokens[2], StringComparison.OrdinalIgnoreCase) - tokens[2].Length);
+            name = name.TrimStart();
+
             fileUrl = url + name;
             return permissions;
         }
 
         private static List<string> ListDirectoryDetails(string url, NetworkCredential credentials)
         {
-            var directoryListRequest = (FtpWebRequest) WebRequest.Create(url);
-            directoryListRequest.Method = WebRequestMethods.Ftp.ListDirectoryDetails;
-            directoryListRequest.Credentials = credentials;
-            directoryListRequest.Timeout = 360000;
-            directoryListRequest.ReadWriteTimeout = 360000;
+            FtpWebRequest directoryListRequest = null;
             var lines = new List<string>();
-
-            using (var listResponse = (FtpWebResponse) directoryListRequest.GetResponse())
-            using (var listStream = listResponse.GetResponseStream())
+            try
             {
-                if (listStream == null)
-                {
-                    throw new ArgumentNullException($"The {url} does not existed or wrong path", nameof(listStream));
-                }
+                directoryListRequest = (FtpWebRequest) WebRequest.Create(url);
+                directoryListRequest.Method = WebRequestMethods.Ftp.ListDirectoryDetails;
+                directoryListRequest.Credentials = credentials;
+                directoryListRequest.Timeout = 360000;
+                directoryListRequest.ReadWriteTimeout = 360000;
 
-                using (var listReader = new StreamReader(listStream))
+                using (var listResponse = (FtpWebResponse) directoryListRequest.GetResponse())
+                using (var listStream = listResponse.GetResponseStream())
                 {
-                    while (!listReader.EndOfStream)
+                    if (listStream == null)
                     {
-                        lines.Add(listReader.ReadLine());
+                        throw new ArgumentNullException($"The {url} does not existed or wrong path", nameof(listStream));
+                    }
+
+                    using (var listReader = new StreamReader(listStream))
+                    {
+                        while (!listReader.EndOfStream)
+                        {
+                            lines.Add(listReader.ReadLine());
+                        }
                     }
                 }
-            }
 
+                return lines;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Exception happen on the Url: " + url + " . Message: " + ex.Message + " .Stack Trace: " + ex.StackTrace);
+            }
             return lines;
         }
 
